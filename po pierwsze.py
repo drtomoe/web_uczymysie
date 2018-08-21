@@ -1,2 +1,2 @@
 print(12)
-pritn("a teraz?")
+print("a teraz?")
