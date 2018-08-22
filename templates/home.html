@@ -1,0 +1,25 @@
+{% extends "layout.html"%}
+
+<!--wlaściwy dla tej sctrony content-->
+
+{% block content %}
+    <h1>home page</h1>
+    {% for post in posts %}
+        <!--stary teks przed przerobieniem - pokazuje mechanikę-->
+        <!--<h1>{{ post.title }}</h1>-->
+        <!--<p>by {{ post.autor }} on {{ post.date }}</p>-->
+        <!--<p>{{ post.content }}</p>-->
+        <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="#">{{ post.autor }}</a>
+              <small class="text-muted">{{ post.date }}</small>
+            </div>
+            <h2><a class="article-title" href="#">{{ post.title }}</a></h2>
+            <p class="article-content">{{ post.content }}</p>
+          </div>
+        </article>
+    {% endfor%}
+{% endblock content %}
+
+
