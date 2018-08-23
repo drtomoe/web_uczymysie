@@ -31,13 +31,14 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="/">Home</a>
-              <a class="nav-item nav-link" href="/about">About</a>
+              <a class="nav-item nav-link" href="{{url_for('home')}}">Home</a>
+              <a class="nav-item nav-link" href="{{url_for('about')}}">About</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
-              <a class="nav-item nav-link" href="/login">Login</a>
-              <a class="nav-item nav-link" href="/register">Register</a>
+              <a class="nav-item nav-link" href="{{url_for('login')}}">Login</a>
+              <a class="nav-item nav-link" href="{{url_for('register')}}">Register</a>
+                <!--          można zrobić href="/register">Register</a>  -ale wersja powyżej jest bezpieczniejsza-->
             </div>
           </div>
         </div>
@@ -47,8 +48,18 @@
    <main role="main" class="container">
       <div class="row">
         <div class="col-md-8">
+            <!--tu wkleimy okienko fleshowe potwierdzające udaną rejestrację-->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %} <!--jeśli wiadomosć flash istnieje-->
+                    {% for category, message in messages %} <!-- flash z funkcji register przekazuje (wiadomość, categowia)-->
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor%}
+                {% endif %}
+            {% endwith %}
             <!--tu jest nasz content block, reszta to przeklejone ozdobniki :(-->
-          {% block content %}{% endblock %}
+            {% block content %}{% endblock %}
         </div>
         <div class="col-md-4">
           <div class="content-section">
