@@ -1,9 +1,12 @@
 from datetime import datetime
-from popierwsze import db
+from popierwsze import db, login_menager
+from flask_login import UserMixin
 
+@login_menager.user_loader      #funkcja dekoracyjna do utrzymywania logowania użytkownika
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-
-class User(db.Model):
+class User(db.Model, UserMixin):    #userMixin pozwoli nam dziedziczyć funkcje tej klasy/logowanie
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
