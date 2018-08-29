@@ -1,6 +1,9 @@
+import os
+import secrets
+from PIL import Image       #modół Pillow do obróbli obrazków
 from flask import render_template, url_for, flash, redirect, request
 from popierwsze import app, db, bcrypt
-from popierwsze.forms import RegistrationForm, LoginForm
+from popierwsze.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from popierwsze.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -56,9 +59,8 @@ def login():
         return redirect(url_for('home'))
 
     form = LoginForm()  # z zakładki forms.py
-    if form.validate_on_submit():  # tu trochę inny kod niż Corey
-        user = User.query.filter_by(
-            email=form.email.data).first()  # jeśli taki email istnieje w db, zwróci pierwszego, inaczej non
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()  # jeśli taki email istnieje w db, zwróci pierwszego, inaczej non
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)  # funkcja z importu
             next_page = request.args.get('next')        #pobierze, jeśli istnieje, z wiersza adresu stronę, z której naj przekierowało do logowania, np 'account'
@@ -74,8 +76,37 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)       #zmienimy nazwę wgrywanego obrazka, żeby nie wgrało się coś niedobrego do db
+    _, f_ext = os.path.splitext(form_picture.filename) #dzieli nazwę na nazwę i rozszerzenie, będziemy potrzebować tego drugiego
+        # sam '_' oznacza zmienną, której nigdzie nie będziemy używać - tu jest to nazwa pliku
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
 
-@app.route('/account')
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)    #przeformatowanie do założonych wymiarów
+    i.save(picture_path)
+
+    return picture_fn       #zwraca nową nazwę obrazka
+
+@app.route('/account', methods=['GET', 'POST'])
 @login_required  # z importu
 def account():
-    return render_template("account.html", title="Account")
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+        if form.picture.data:       #jeśli mamy obrazek
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file  #wstawiamy w db przesłany plik (ze zmienioną nazwą)
+
+        current_user.username=form.username.data        #podmieniamy w db username i emaila
+        current_user.email=form.email.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('account'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username      #wstawi w pola dane domyślne dla obecnego użytkownika
+        form.email.data = current_user.email
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    # 'static' jako stały adres, plik z katalogu 'profile_pics' i plik o nazwie takiej jak w db / domyślnie default
+    return render_template("account.html", title="Account", image_file=image_file, form=form)

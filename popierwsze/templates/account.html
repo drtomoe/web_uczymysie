@@ -2,5 +2,66 @@
 <!--wstawiliśmy ramkę z layouta-->
 
 {% block content %}
-    <h1>{{ current_user.username }}</h1>
+    <div class="content-section">
+      <div class="media">
+        <img class="rounded-circle account-img" src="{{ image_file }}">
+        <div class="media-body">
+          <h2 class="account-heading">{{ current_user.username }}</h2>
+          <p class="text-secondary">{{ current_user.email }}</p>
+        </div>
+      </div>
+        <form method="post" action="" enctype="multipart/form-data">    <!--to ostatnie do łapania errorów obrazkowych :? -->
+            {{ form.hidden_tag() }}
+            <!--hidden tag jest powiązany z popierwsze.secretKey &ndash;&gt; potrzebny do ochrony przed atakami-->
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Account Info</legend>
+                <div class="form-group">
+                   <!--tworzenie lebela i pola do wpisywania username-->
+                    {{ form.username.label(class="form-control-label") }}
+
+                    {% if form.username.errors %} <!-- jeśli wystąpi błąd przy pisywaniu username-->
+                        {{ form.username(class="form-control form-control-lg is-invalid") }} <!-- sprawdz/control length nie waliduje-->
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+
+                        </div>
+                    {% else %}
+                        <!-- jesli nie ma błędów, to zostaw pole formatki-->
+                        {{ form.username(class="form-control form-control-lg") }}
+                    {% endif %}
+
+                </div>
+                <div class="form-group">
+                    {{ form.email.label(class="form-control-label") }}
+
+                    {% if form.email.errors %}
+                        {{ form.email(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+
+                        </div>
+                    {% else %}
+                       {{ form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.picture.label() }}
+                    {{ form.picture(class="form-control-file") }}
+                    {% if form.picture.errors %}        <!--łapanie errorów dla plików jest trochę inne niż dla textowych pól-->
+                        {% for error in form.picture.errors %}
+                            <span class="text-danger">{{ error }}</span></br>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="="form-group>
+                {{ form.submit(class="btn bnt-outline-info") }}
+
+            </div>
+        </form>
+    </div>
 {% endblock content %}
