@@ -2,6 +2,8 @@ from datetime import datetime
 from popierwsze import db, login_menager
 from flask_login import UserMixin
 
+        ##klasy-tabele które będą zapisywane w bazie danych db
+
 @login_menager.user_loader      #funkcja dekoracyjna do utrzymywania logowania użytkownika
 def load_user(user_id):
     return User.query.get(int(user_id))

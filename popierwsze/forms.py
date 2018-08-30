@@ -1,9 +1,11 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from popierwsze.models import User
+
+        ## formatki do wykorzystania na danej stronie html
 
 
 class RegistrationForm(FlaskForm):
@@ -42,7 +44,7 @@ class LoginForm(FlaskForm):
 
 class UpdateAccountForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired(), Length(min=2, max=20)])
-# pole tekstowe "Username" --> DataRequired - oznacza, że pole nie może być puste, Length określa dopuszczalną długość
+# pole tekstowe etykietka = "Username" --> DataRequired - oznacza, że pole nie może być puste, Length określa dopuszczalną długość
 
     email = StringField("Email", validators=[DataRequired(), Email()])
                     # pole nie może być puste oraz --> Email sprawdza/waliduje poprawnośc zapisanego adresu email
@@ -60,3 +62,8 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first() #jeśli w bazie bedzie takia nazwa, to zwróci pierwszą, jeśli nie to zwróci non
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
+
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Post')

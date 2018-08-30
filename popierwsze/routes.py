@@ -1,32 +1,18 @@
 import os
 import secrets
-from PIL import Image       #modół Pillow do obróbli obrazków
-from flask import render_template, url_for, flash, redirect, request
-from popierwsze import app, db, bcrypt
-from popierwsze.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from PIL import Image       #modół Pillow do obróbki obrazków
+from flask import render_template, url_for, flash, redirect, request, abort
+from popierwsze import app, db, bcrypt          #z __init__
+from popierwsze.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from popierwsze.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
-posts = [
-    {
-        "autor": "ina",
-        "title": "post 1",
-        "content": "first post content",
-        "date": "21.08.2018"
-    },
-    {
-        "autor": "tomoe",
-        "title": "post 2",
-        "content": "second post content",
-        "date": "22.08.2018"
-    }
-
-]
-
+        ## ścieżki/route w wierszu poleceń i logika zachowań
 
 @app.route("/")
 @app.route("/home")
 def home():
+    posts = Post.query.all()        #wyciąganie postów z db
     return render_template("home.html", posts=posts)
     # zwróć wygenerowaną stronę -->home, przekaż posty
 
@@ -110,3 +96,54 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     # 'static' jako stały adres, plik z katalogu 'profile_pics' i plik o nazwie takiej jak w db / domyślnie default
     return render_template("account.html", title="Account", image_file=image_file, form=form)
+
+
+@app.route('/post/new', methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('home'))
+    return render_template("create_post.html", title="New Post", form=form, legend='New Post')
+
+
+@app.route('/post/<int:post_id>')   #zmienna typu int - w wierszu będzie widoczny numer-id posta
+def post(post_id):
+    #post = Post.query.get(post_id)         --> lub:
+    post = Post.query.get_or_404(post_id)       #jeśli nie ma posta o tym id wywal 404error
+    return render_template('post.html', title=post.title, post=post)
+
+
+@app.route('/post/<int:post_id>/update', methods=['GET', 'POST'])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        about(403)      #przerwij i wyświetl błąd, posta nie może zmienić jeśli nie jesteś jego autorem
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()     #jak coś już jest w db (a jest bo to modyfikujemy) to tylko commit, bez add
+        flash('Your message has been updated!', 'success')
+        return redirect(url_for('post', post_id=post.id ))
+    elif request.method == 'GET':
+        form.title.data = post.title
+        form.content.data = post.content
+    return render_template("create_post.html", title="Update Post", form=form, legend='Update Post', )
+
+
+@app.route('/post/<int:post_id>/delete', methods=['POST'])      #bez GET, bo nie będziemy nic pobierać, tylko kasować/updatować
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        about(403)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Your message has been deleted!', 'success')
+    return redirect(url_for('home'))
