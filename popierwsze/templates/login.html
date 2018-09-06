@@ -45,15 +45,16 @@
             </fieldset>
             <div class="="form-group>       <!--przycisk zatwierdzający-->
                 {{ form.submit(class="btn bnt-outline-info") }}
+                <small class="text-muted ml-2">
+                    <a href="{{ url_for('users.reset_request') }}">Forgot Password?</a>
+                </small>
             </div>
-            <small class="text-muted ml-2">
-                <a href="#">Forgot Password?</a>    <!--na razie link do nikąd, uzupełnione potem reset hasła-->
-            </small>
+
         </form>
     </div>
     <div class="border-top pt-3">
         <small class="text-muted">
-            Need An Acount? <a class="ml-2" href="{{ url_for('register')}}">Sing Up Now</a>
+            Need An Acount? <a class="ml-2" href="{{ url_for('users.register')}}">Sing Up Now</a>
         </small>
 
     </div>

@@ -14,10 +14,10 @@
           <!--article-img odwołuje się do css i sprawdza rozmiar itp-->
           <div class="media-body">
             <div class="article-metadata">
-              <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+              <a class="mr-2" href="{{ url_for('users.user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
               <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small> <!--string-f-time -format daty jaki chcemy wyświetlić-->
             </div>
-            <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+            <h2><a class="article-title" href="{{ url_for('posts.post', post_id=post.id) }}">{{ post.title }}</a></h2>
             <p class="article-content">{{ post.content }}</p>
           </div>
         </article>
@@ -26,9 +26,9 @@
     <!-- dla strony o numerze iterowanej po kolejnych stronach(ilość stron po bokach pierwsza, ostania, po jednej od obecnej) -->
         {% if page_num %}
             {% if posts.page == page_num %} <!-- jeśli obecna strona == stronie-num to ona będzie trochę inaczej wyglądać niż reszta-->
-                <a class="btn btn-info mb-4" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+                <a class="btn btn-info mb-4" href="{{ url_for('main.home', page=page_num) }}">{{ page_num }}</a>
             {% else %}
-                <a class="btn btn-outline-info mb-4" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+                <a class="btn btn-outline-info mb-4" href="{{ url_for('main.home', page=page_num) }}">{{ page_num }}</a>
 
             {% endif %}
         {% else %}
